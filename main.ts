@@ -3,7 +3,8 @@ namespace Roboter {
     const IICADRRESS = 0x10;
     const id = "245rtzf717601-1512";
     let velocity = 0.26; //unit: mm/ms
-    let angularVelocity = 360 / 650; //unit: degree/ms
+    let angularVelocityLeft = 360 / 650; //unit: degree/ms
+    let angularVelocityRight = 360 / 650; //unit: degree/ms
     let tuningSpeed = 100;
     export enum Dir {
         //% block="vorwärts"
@@ -23,7 +24,7 @@ namespace Roboter {
     //% block="90 Grad nach Links drehen"
     //% weight=490
     export function turnLeft90() {
-        let wait = 90 / angularVelocity;
+        let wait = 90 / angularVelocityLeft;
         basic.pause(wait);
         writeData([0x00, 1, tuningSpeed]);
         writeData([0x02, 0, tuningSpeed]);
@@ -38,7 +39,7 @@ namespace Roboter {
     //% block="90 Grad nach Rechts drehen"
     //% weight=480
     export function turnRight90() {
-        let wait2 = 90 / angularVelocity;
+        let wait2 = 90 / angularVelocityRight;
         writeData([0x00, 0, tuningSpeed]);
         writeData([0x02, 1, tuningSpeed]);
         basic.pause(wait2);
@@ -53,15 +54,17 @@ namespace Roboter {
     //% weight=470
     export function turnDegrees(degrees: number) {
         if (degrees < 0) {
+            // negative = nach rechts
             degrees = degrees * (-1);
-            let wait3 = degrees / angularVelocity;
+            let wait3 = degrees / angularVelocityRight;
             writeData([0x00, 0, tuningSpeed]);
             writeData([0x02, 1, tuningSpeed]);
             basic.pause(wait3);
             writeData([0x00, 0, 0]);
             writeData([0x02, 0, 0]);
         } else {
-            let wait32 = degrees / angularVelocity;
+            // positiv = nach links
+            let wait32 = degrees / angularVelocityLeft;
             writeData([0x00, 1, tuningSpeed]);
             writeData([0x02, 0, tuningSpeed]);
             basic.pause(wait32);
@@ -99,7 +102,7 @@ namespace Roboter {
             direction = 1;
             distance = distance * (-1);
         }
-        let wait4 = ((distance * 10) / velocity); // (cm*10)/mm/ms 
+        let wait4 = ((distance * 10) / velocity); // (cm*10)/mm/ms
         writeData([0x00, direction, 200]);
         writeData([0x02, direction, 200]);
         basic.pause(wait4)
@@ -194,12 +197,30 @@ namespace Roboter {
         velocity = distance / 100; // unit: mm/ms
     }
 
+    // Setzt die Drehgeschwindigkeit für beide Richtungen (wie bisher).
     //% blockId=id+"setAngularVelocity"
     //% block="500ms sind $degrees Grad"
     //% group="Konfiguration"
     //% weight=180
     export function setAngularVelocity(degrees: number) {
-        angularVelocity = degrees / 500; //unit: degree/ms
+        angularVelocityLeft = degrees / 500; //unit: degree/ms
+        angularVelocityRight = degrees / 500; //unit: degree/ms
+    }
+
+    //% blockId=id+"setAngularVelocityLeft"
+    //% block="Linksdrehung: 500ms sind $degrees Grad"
+    //% group="Konfiguration"
+    //% weight=179
+    export function setAngularVelocityLeft(degrees: number) {
+        angularVelocityLeft = degrees / 500; //unit: degree/ms
+    }
+
+    //% blockId=id+"setAngularVelocityRight"
+    //% block="Rechtsdrehung: 500ms sind $degrees Grad"
+    //% group="Konfiguration"
+    //% weight=178
+    export function setAngularVelocityRight(degrees: number) {
+        angularVelocityRight = degrees / 500; //unit: degree/ms
     }
 
     //% blockId=id+"driveFor1000Ms"
@@ -215,12 +236,24 @@ namespace Roboter {
     }
 
     //% blockId=id+"turnFor500ms"
-    //% block="für 500ms drehen"
+    //% block="für 500ms nach rechts drehen"
     //% group="Konfiguration"
     //% weight=160
     export function turnFor500ms() {
         writeData([0x00, 0, tuningSpeed]);
         writeData([0x02, 1, tuningSpeed]);
+        basic.pause(500);
+        writeData([0x00, 0, 0]);
+        writeData([0x02, 0, 0]);
+    }
+
+    //% blockId=id+"turnLeftFor500ms"
+    //% block="für 500ms nach links drehen"
+    //% group="Konfiguration"
+    //% weight=155
+    export function turnLeftFor500ms() {
+        writeData([0x00, 1, tuningSpeed]);
+        writeData([0x02, 0, tuningSpeed]);
         basic.pause(500);
         writeData([0x00, 0, 0]);
         writeData([0x02, 0, 0]);
